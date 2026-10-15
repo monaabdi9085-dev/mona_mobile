@@ -1,20 +1,52 @@
 name: CI
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      datafil:
+        description: "CSV-fil som ska valideras"
+        required: true
+        default: "data/kundbas.csv"
+        type: string
 
 jobs:
-  allt:
+  # Jobb 1: Datavalidering med Pandera
+  datakontroll:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      - run: pip install -e ".[dev]"
-      - run: pytest
+      - name: Installera beroenden
+        run: python -m pip install -e ".[dev]"
 
-      - run: python -m churn.model
+      - name: Validera kunddata
+        env:
+          DATAFIL: ${{ inputs.datafil || 'data/kundbas.csv' }} # <------ LLM ASSITANC 
+        run: python kontroll_mapp/schema.py "$DATAFIL"    # <------ LLM ASSITANC 
 
-     
+  # Jobb 2: Tester och modellträning
+  allt:
+    needs: datakontroll
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Installera beroenden
+        run: python -m pip install -e ".[dev]"
+
+      - name: Kör tester
+        run: python -m pytest
+
+      - name: Träna modellen
+        run: python -m churn.model
