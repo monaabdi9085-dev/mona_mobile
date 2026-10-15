@@ -30,7 +30,7 @@ jobs:
           DATAFIL: ${{ inputs.datafil || 'data/kundbas.csv' }} # <------ LLM ASSITANC 
         run: python kontroll_mapp/schema.py "$DATAFIL"    # <------ LLM ASSITANC 
 
-  # Jobb 2: Tester och modellträning
+  # Jobb 2: Tester och modellträning och evaluering !
   allt:
     needs: datakontroll
     runs-on: ubuntu-latest
@@ -50,3 +50,9 @@ jobs:
 
       - name: Träna modellen
         run: python -m churn.model
+      
+
+      - name: Evaluering
+        run: python -m churn.evaluate
+        
+
