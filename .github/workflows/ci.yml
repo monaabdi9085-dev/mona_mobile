@@ -1,19 +1,85 @@
 name: CI
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      datafil:
+        description: "CSV-fil som ska valideras"
+        required: true
+        default: "data/kundbas.csv"
+        type: string
 
 jobs:
-  allt:
+  # Jobb 1: Datavalidering med Pandera
+  datakontroll:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml" 
 
-      - run: pip install -e .
+      - name: Installera beroenden
+        run: python -m pip install -e ".[dev]"
 
-      - run: pytest
+      - name: Validera kunddata
+        env:
+          DATAFIL: ${{ inputs.datafil || 'data/kundbas.csv' }} # <------ LLM ASSITANC 
+        run: python kontroll_mapp/schema.py "$DATAFIL"    # <------ LLM ASSITANC 
 
-      - run: python -m churn.model
+  # Jobb 2: Tester på tre python versioner
+  tester:
+    needs: datakontroll
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Installera beroenden
+        run: python -m pip install -e ".[dev]"
+
+      - name: Kör tester
+        run: python -m pytest 
+   
+  training:
+     needs: tester
+     runs-on: ubuntu-latest
+     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Installera beroenden 
+        run: python -m pip install -e ".[dev]"
+
+      - name: Träna modellen
+        run: python -m churn.model
+
+      - name: Evaluering
+        run: python -m churn.evaluate 
+
+      
+
+
+
+      
+
+     
+
