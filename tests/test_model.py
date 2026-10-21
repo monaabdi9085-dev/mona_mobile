@@ -1,5 +1,5 @@
 """Testnivå 3: modell. Kontrakt och reproducerbarhet."""
-
+ 
 import json
 from pathlib import Path
 
@@ -34,3 +34,14 @@ def test_reproducerbar(resultat):
     # Lades till efter förra incidenten: kolla att senaste träningen har ett rimligt ROC AUC.
  #   matvarden = json.loads(Path("outputs/matvarden.json").read_text())
   #  assert matvarden["roc_auc"] >= 0.70
+
+# Hämtar resultat från funktionen träna_och_utvärdera (model.py)
+def test_models_roc_auc(resultat):
+    _,matvarden = resultat
+    print(matvarden["roc_auc"]) 
+    assert matvarden["roc_auc"] >= 0.70 # först 0,70 sedan 0,90 för att få rött !, sedan 0.70
+
+# print verkar inte visa resultat men allt godkänt woho ! 
+# frågade mr GPT med kommandot -s ser man resultat i terminal 
+
+
