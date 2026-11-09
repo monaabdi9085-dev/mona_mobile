@@ -22,15 +22,15 @@ jobs:
         with:
           python-version: "3.13"
           cache: "pip"
-          cache-dependency-path: "pyproject.toml" 
+          cache-dependency-path: "pyproject.toml"
 
       - name: Installera beroenden
         run: python -m pip install -e ".[dev]"
 
       - name: Validera kunddata
         env:
-          DATAFIL: ${{ inputs.datafil || 'data/kundbas.csv' }} # <------ LLM ASSITANC 
-        run: python kontroll_mapp/schema.py "$DATAFIL"    # <------ LLM ASSITANC 
+          DATAFIL: ${{ inputs.datafil || 'data/kundbas.csv' }} # <------ LLM ASSITANC
+        run: python kontroll_mapp/schema.py "$DATAFIL" # <------ LLM ASSITANC
 
   # Jobb 2: Tester på tre python versioner
   tester:
@@ -55,91 +55,55 @@ jobs:
         run: python -m pip install -e ".[dev]"
 
       - name: Kör tester
-        run: python -m pytest 
-   
+        run: python -m pytest
+
   training:
-     needs: tester
-     runs-on: ubuntu-latest
-     steps:
+    needs: tester
+    runs-on: ubuntu-latest
+
+    steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Installera beroenden 
+
+      - name: Installera beroenden
         run: python -m pip install -e ".[dev]"
 
       - name: Träna modellen
         run: python -m churn.model
 
       - name: Ladda upp modellartefakt
-       uses: actions/upload-artifact@v4 
+        uses: actions/upload-artifact@v4
+        with:
+          name: modell-${{ github.sha }}
+          path: outputs/
 
-       with: 
-         name: modell-${{ github.sha}}
-         path: outputs/
-#########################
-    utvardera: 
-      needs: training 
-      runs-on: ubuntu-latest
-      steps: 
-        - uses: actions/checkout@v4 
-      
-    
-        - name: Ladda ner modellartefakt
-          uses: actions/download-artifact@v4 
-          with: 
-           name: modell-${{ github.sha}}
-           path: outputs/
+  utvardera:
+    needs: training
+    runs-on: ubuntu-latest
 
-          uses: actions/setup-python@v5
-          with: 
-            python-version : "3.11"
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Installera beroenden 
-          run: python -m pip install  -e ".[dev]"
+      - name: Ladda ner modellartefakt
+        uses: actions/download-artifact@v4
+        with:
+          name: modell-${{ github.sha }}
+          path: outputs/
 
-        - name: Kontrollera tröskeln
-          run: python -m churn.evaluate 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-        - name: Visa mätvärden i Summary
-          run: 
-             echo "## Modellens mätvärden" >> "GITHUB_STEP_SUMMARY"
-             cat outputs/matvarden.json >> "GITHUB_STEP_SUMMARY" 
+      - name: Installera beroenden
+        run: python -m pip install -e ".[dev]"
 
-             
-             
-             
+      - name: Kontrollera tröskeln
+        run: python -m churn.evaluate
 
-
-
-          
-
-
-
-
-
-           
-
-
-
-
-
-
-
-
-      
-        
-
-
-      - name: Evaluering
-        run: python -m churn.evaluate 
-
-      
-
-
-
-      
-
-     
-
+      - name: Visa mätvärden i Summary
+        run: |
+          echo "## Modellens mätvärden" >> "$GITHUB_STEP_SUMMARY"
+          cat outputs/matvarden.json >> "$GITHUB_STEP_SUMMARY"
