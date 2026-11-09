@@ -30,3 +30,18 @@ def test_indata_andras_inte(liten_df):
     original = liten_df.copy()
     skapa_features(liten_df)
     pd.testing.assert_frame_equal(liten_df, original)
+
+
+### Tillagd test som kontrollerar om skapa_features ger rätt resultat (pytest test)
+# lägger till manadskostnad och data_gb_per_manad för att inte få keyerror vid andra försök
+# skapa features innehöll mer än region
+
+def test_region_med_versaler():
+    df = pd.DataFrame({
+        "region":["STOCKHOLM"],
+        "manadskostnad":[200],
+        "data_gb_per_manad":[10]
+
+    })
+    resultat= skapa_features(df)
+    assert resultat["region"].iloc[0] == "Stockholm" 
