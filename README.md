@@ -24,7 +24,7 @@ var sämre än den förra. Ingen märkte det förrän säljarna klagade, och ing
 commit eller vilken data modellen kom från.
 
 **Ditt uppdrag:** se till att bara en testad modell med känd härkomst kan bli en ringlista.
-Jag har skrivit ärenden åt dig, se *Kom igång* nedan.
+Jag har skrivit ärenden åt dig, se *Kom igång* nedan...
 
 Två regler:
 
