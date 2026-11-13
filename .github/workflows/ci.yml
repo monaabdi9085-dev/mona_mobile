@@ -1,5 +1,9 @@
 name: CI
 on:
+
+  schedule:
+    - cron: "0 6 * * 1"
+      timezone: "Europe/Stockholm"
   push:
     paths:
       - "src/**"
