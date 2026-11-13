@@ -18,7 +18,7 @@ on:
       - "kontroll_mapp/**"
       - "pyproject.toml"
       - ".github/workflows/**"
-
+# Testar concurrency
   workflow_dispatch:
     inputs:
       datafil:
