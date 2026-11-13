@@ -124,7 +124,7 @@ jobs:
         run: |
           echo "## Modellens mätvärden" >> "$GITHUB_STEP_SUMMARY"
           cat outputs/matvarden.json >> "$GITHUB_STEP_SUMMARY"
-   ringlista:
+  ringlista:
     needs: utvardera
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
