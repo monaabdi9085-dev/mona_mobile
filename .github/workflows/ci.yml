@@ -26,6 +26,9 @@ on:
         required: true
         default: "data/kundbas.csv"
         type: string
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # Jobb 1: Datavalidering med Pandera
